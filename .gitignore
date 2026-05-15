@@ -20,6 +20,3 @@ data/playwright-profile/
 
 # OS
 Thumbs.db
-
-# Build cache
-*.tsbuildinfo
