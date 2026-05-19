@@ -76,17 +76,12 @@ export async function closeContext(): Promise<void> {
 }
 
 export async function isLinkedInLoggedIn(userId: number): Promise<boolean> {
-  const page = await newPage(userId);
+  const c = await getContext(userId);
   try {
-    await page.goto('https://www.linkedin.com/feed/', { waitUntil: 'domcontentloaded', timeout: 30_000 });
-    // Logged-in feed contains nav with "data-control-name=identity_welcome_message" or similar.
-    // Logged-out redirects to /login or /uas/login.
-    await page.waitForTimeout(1500);
-    const url = page.url();
-    if (/\/login|\/uas\/login|\/checkpoint/.test(url)) return false;
-    // Look for the global nav.
-    const nav = await page.$('nav.global-nav, header.global-nav, nav[aria-label="Primary"]');
-    return !!nav;
+    const res = await c.request.get('https://www.linkedin.com/feed/', { maxRedirects: 5, timeout: 15_000 });
+    const finalUrl = res.url();
+    if (/\/login|\/uas\/login|\/checkpoint/.test(finalUrl)) return false;
+    return res.ok() && /linkedin\.com\/feed/.test(finalUrl);
   } catch (err) {
     log.warn('isLinkedInLoggedIn check failed', err);
     return false;
@@ -104,15 +99,12 @@ export async function startLinkedInLogin(userId: number): Promise<void> {
 // The Sales Nav home page is /sales/home; logged-out redirects to a marketing page
 // or the LinkedIn login flow.
 export async function isSalesNavLoggedIn(userId: number): Promise<boolean> {
-  const page = await newPage(userId);
+  const c = await getContext(userId);
   try {
-    await page.goto('https://www.linkedin.com/sales/home', { waitUntil: 'domcontentloaded', timeout: 30_000 });
-    await page.waitForTimeout(1500);
-    const url = page.url();
-    if (/\/login|\/uas\/login|\/sales\/start|\/sales\/marketing|\/checkpoint/.test(url)) return false;
-    // Sales Nav home has a unique nav element with data-anchor="sales-nav-app-tabs-home" or sales-nav-app-bar.
-    const nav = await page.$('nav[aria-label*="Sales Navigator"], header[id*="sales-nav"], div[id*="search-bar-app"]');
-    return !!nav;
+    const res = await c.request.get('https://www.linkedin.com/sales/home', { maxRedirects: 5, timeout: 15_000 });
+    const finalUrl = res.url();
+    if (/\/login|\/uas\/login|\/sales\/start|\/sales\/marketing|\/checkpoint/.test(finalUrl)) return false;
+    return res.ok() && /linkedin\.com\/sales\//.test(finalUrl);
   } catch (err) {
     log.warn('isSalesNavLoggedIn check failed', err);
     return false;

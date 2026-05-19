@@ -15,12 +15,18 @@ log.info('app starting');
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow(): void {
+  const iconPath = process.platform === 'darwin'
+    ? join(__dirname, '../../build/icon.icns')
+    : process.platform === 'win32'
+    ? join(__dirname, '../../build/icon.ico')
+    : join(__dirname, '../../build/icon.png');
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 820,
     minWidth: 1024,
     minHeight: 700,
     title: 'LinkedIn Copilot',
+    icon: iconPath,
     backgroundColor: '#0e1116',
     show: false,
     autoHideMenuBar: true,
@@ -61,6 +67,13 @@ if (!gotLock) {
   });
 
   app.whenReady().then(() => {
+    if (process.platform === 'darwin' && app.dock) {
+      try {
+        app.dock.setIcon(join(__dirname, '../../build/icon.png'));
+      } catch (err) {
+        log.warn('dock.setIcon failed', err);
+      }
+    }
     initSchema();
     const user = ensureDefaultUser();
     log.info('default user', user);

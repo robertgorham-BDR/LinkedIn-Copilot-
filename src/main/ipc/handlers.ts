@@ -80,8 +80,8 @@ export function registerIpc(getWindow: GetWindow): void {
       const already = await isLinkedInLoggedIn(u.id);
       if (already) { setLinkedInState('logged-in'); return { ok: true, alreadyLoggedIn: true }; }
       await startLinkedInLogin(u.id);
-      for (let i = 0; i < 36; i++) {
-        await new Promise((r) => setTimeout(r, 5000));
+      for (let i = 0; i < 24; i++) {
+        await new Promise((r) => setTimeout(r, 15000));
         if (await isLinkedInLoggedIn(u.id)) { setLinkedInState('logged-in'); return { ok: true, alreadyLoggedIn: false }; }
       }
       setLinkedInState('logged-out');
@@ -95,14 +95,27 @@ export function registerIpc(getWindow: GetWindow): void {
 
   ipcMain.handle('linkedin:status', () => getLinkedInState());
 
+  ipcMain.handle('linkedin:probe', async () => {
+    try {
+      const u = ensureDefaultUser();
+      const ok = await isLinkedInLoggedIn(u.id);
+      setLinkedInState(ok ? 'logged-in' : 'logged-out');
+      return getLinkedInState();
+    } catch (err) {
+      log.warn('linkedin:probe failed', err);
+      setLinkedInState('error');
+      return getLinkedInState();
+    }
+  });
+
   ipcMain.handle('salesnav:login', async () => {
     const u = ensureDefaultUser();
     try {
       const already = await isSalesNavLoggedIn(u.id);
       if (already) { setSalesNavState('logged-in'); return { ok: true, alreadyLoggedIn: true }; }
       await startSalesNavLogin(u.id);
-      for (let i = 0; i < 36; i++) {
-        await new Promise((r) => setTimeout(r, 5000));
+      for (let i = 0; i < 24; i++) {
+        await new Promise((r) => setTimeout(r, 15000));
         if (await isSalesNavLoggedIn(u.id)) { setSalesNavState('logged-in'); return { ok: true, alreadyLoggedIn: false }; }
       }
       setSalesNavState('logged-out');
@@ -115,6 +128,19 @@ export function registerIpc(getWindow: GetWindow): void {
   });
 
   ipcMain.handle('salesnav:status', () => getSalesNavState());
+
+  ipcMain.handle('salesnav:probe', async () => {
+    try {
+      const u = ensureDefaultUser();
+      const ok = await isSalesNavLoggedIn(u.id);
+      setSalesNavState(ok ? 'logged-in' : 'logged-out');
+      return getSalesNavState();
+    } catch (err) {
+      log.warn('salesnav:probe failed', err);
+      setSalesNavState('error');
+      return getSalesNavState();
+    }
+  });
 
   ipcMain.handle('orch:single', async (_e, req: OrchestratorRequest) => {
     const win = getWindow();

@@ -179,7 +179,9 @@ export interface IpcApi {
   runSync: () => Promise<SyncResult>;
   // Health.
   getLinkedInStatus: () => Promise<{ state: 'unknown' | 'logged-in' | 'logged-out' | 'error'; lastObservedAt: string | null }>;
+  probeLinkedIn: () => Promise<{ state: 'unknown' | 'logged-in' | 'logged-out' | 'error'; lastObservedAt: string | null }>;
   getSalesNavStatus: () => Promise<{ state: 'unknown' | 'logged-in' | 'logged-out' | 'error'; lastObservedAt: string | null }>;
+  probeSalesNav: () => Promise<{ state: 'unknown' | 'logged-in' | 'logged-out' | 'error'; lastObservedAt: string | null }>;
   loginSalesNav: () => Promise<{ ok: boolean; alreadyLoggedIn: boolean; error?: string }>;
   // Draft editing.
   updateDraft: (outreach_id: number, patch: { body?: string; subject?: string }) => Promise<{ ok: boolean; char_count: number; confidence: ConfidenceScore | null; rescored?: boolean }>;

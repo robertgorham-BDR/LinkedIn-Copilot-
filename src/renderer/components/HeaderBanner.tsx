@@ -32,10 +32,18 @@ export default function HeaderBanner() {
     setState((prev) => ({ ...prev, anthropic: a, apollo: p, linkedin: l.state, salesnav: sn.state, sendsToday: s.count }));
   }
 
+  async function probeAndRefresh() {
+    // Probe runs the no-tab cookie+fetch check and updates runtime state.
+    await Promise.all([window.api.probeLinkedIn(), window.api.probeSalesNav()]);
+    await refresh();
+  }
+
   useEffect(() => {
-    void refresh();
-    const id = setInterval(refresh, 8_000);
-    return () => clearInterval(id);
+    void probeAndRefresh();
+    // Light refresh every 8s reads cached state; full probe every 60s re-verifies sessions.
+    const fast = setInterval(refresh, 8_000);
+    const slow = setInterval(probeAndRefresh, 60_000);
+    return () => { clearInterval(fast); clearInterval(slow); };
   }, []);
 
   return (

@@ -36,8 +36,17 @@ export default function App() {
   const [view, setView] = useState<View>('home');
   const [detailId, setDetailId] = useState<number | null>(null);
   const [user, setUser] = useState<{ display_name: string; email: string } | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const stored = (typeof window !== 'undefined' && localStorage.getItem('theme')) as 'dark' | 'light' | null;
+    return stored ?? 'dark';
+  });
   const shortcuts = useShortcutsOverlay();
   const palette = useCommandPalette();
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   useEffect(() => {
     void window.api.getCurrentUser().then(setUser);
@@ -98,6 +107,13 @@ export default function App() {
         </nav>
         <div className="p-3 border-t border-white/5 flex items-center justify-between text-[10px] text-ink-200/40">
           <button onClick={() => palette.setOpen(true)} className="hover:text-ink-200 font-mono" title="Command palette (Cmd+K)">⌘ K</button>
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="hover:text-ink-200"
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? '☀' : '☾'}
+          </button>
           <span>v0.1.0</span>
           <button onClick={() => shortcuts.setOpen(true)} className="hover:text-ink-200 font-mono" title="Keyboard shortcuts (Cmd+/)">⌘ /</button>
         </div>

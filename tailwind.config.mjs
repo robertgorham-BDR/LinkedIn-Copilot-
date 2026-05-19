@@ -4,7 +4,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: { 50: '#f7f7f8', 100: '#eceef0', 200: '#d8dce0', 800: '#1f2328', 900: '#0e1116' },
+        ink: {
+          50: 'rgb(var(--ink-50) / <alpha-value>)',
+          100: 'rgb(var(--ink-100) / <alpha-value>)',
+          200: 'rgb(var(--ink-200) / <alpha-value>)',
+          800: 'rgb(var(--ink-800) / <alpha-value>)',
+          900: 'rgb(var(--ink-900) / <alpha-value>)'
+        },
+        line: 'rgb(var(--line) / <alpha-value>)',
+        surface: 'rgb(var(--surface) / <alpha-value>)',
         accent: { DEFAULT: '#0a66c2', dark: '#004182' }
       },
       fontFamily: {
